@@ -1,0 +1,10 @@
+sql_query_create_table_vote = """CREATE TABLE IF NOT EXISTS FilesPaths (
+    chatId integer NOT NULL,
+    chatTitle String,
+    fileClassification txt NOT NULL,
+    fileType txt NOT NULL,
+	fileName str NOT NULL,
+	author str NOT NULL,
+	timeCreation int,
+	UNIQUE(chatId, fileClassification, fileType, fileName)
+	);"""
