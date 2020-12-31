@@ -2,10 +2,10 @@ package com.chartsbot
 
 import com.chartsbot.config.ConfigProvider
 import com.chartsbot.controllers.DefaultFileHandlerGrpcController
-import com.chartsbot.models.{DefaultSqlFilesDAO, SqlFilesDAO}
+import com.chartsbot.models.{ DefaultSqlFilesDAO, SqlFilesDAO }
 import com.chartsbot.services._
 import com.google.inject.binder.ScopedBindingBuilder
-import com.google.inject.{AbstractModule, Module}
+import com.google.inject.{ AbstractModule, Module }
 import com.typesafe.config.Config
 
 import scala.concurrent.ExecutionContext

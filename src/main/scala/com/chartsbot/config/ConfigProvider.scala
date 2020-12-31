@@ -1,8 +1,8 @@
 package com.chartsbot.config
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 
-import javax.inject.{Provider, Singleton}
+import javax.inject.{ Provider, Singleton }
 
 @Singleton
 class ConfigProvider extends Provider[Config] {

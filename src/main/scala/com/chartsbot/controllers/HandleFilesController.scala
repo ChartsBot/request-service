@@ -2,12 +2,12 @@ package com.chartsbot.controllers
 
 import akka.actor.typed.ActorSystem
 import com.chartsbot.config.ConfigPaths.FtpPaths
-import com.chartsbot.models.{SftpDAO, SqlFilesDAO}
-import com.chartsbot.services.{FileUploadRequest, FileUploadResponse}
+import com.chartsbot.models.{ SftpDAO, SqlFilesDAO }
+import com.chartsbot.services.{ FileUploadRequest, FileUploadResponse }
 import com.typesafe.config.Config
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait HandleFilesController {
 

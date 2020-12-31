@@ -1,15 +1,15 @@
 package com.chartsbot.models
 
 import akka.stream.alpakka.ftp.scaladsl.Sftp
-import akka.stream.alpakka.ftp.{FtpFile, SftpSettings}
-import akka.stream.scaladsl.{FileIO, Sink, Source}
-import akka.stream.{IOResult, Materializer}
+import akka.stream.alpakka.ftp.{ FtpFile, SftpSettings }
+import akka.stream.scaladsl.{ FileIO, Sink, Source }
+import akka.stream.{ IOResult, Materializer }
 import akka.util.ByteString
-import akka.{Done, NotUsed}
+import akka.{ Done, NotUsed }
 import com.chartsbot.services.SftpConnector
 
-import java.nio.file.{Path, Paths}
-import javax.inject.{Inject, Singleton}
+import java.nio.file.{ Path, Paths }
+import javax.inject.{ Inject, Singleton }
 import scala.collection.immutable
 import scala.concurrent.Future
 
