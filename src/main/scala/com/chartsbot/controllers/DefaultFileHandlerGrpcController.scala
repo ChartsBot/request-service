@@ -25,8 +25,11 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
   override def uploadFile(fileUpReq: FileUploadRequest): Future[FileUploadResponse] = {
     logger.info("Uploading file on " + fileUpReq.chatTitle + " by " + fileUpReq.author)
 
+    val tmpFilePath = Util.bytesToFile(fileUpReq.file.toByteArray)
+
     val fileName: String = fileUpReq.fileType.toLowerCase match {
-      case "image" => Util.imageToWords(fileUpReq.pathOnDisk) + ".jpg"
+      case "image" =>
+        Util.imageToWords(tmpFilePath) + ".jpg"
       case "video" => "aaa" + ".mp4"
     }
 
@@ -53,7 +56,8 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
       case Success(_) =>
         val maybeCreateDir: Future[immutable.Seq[Done]] = sftpDAO.createDir("", fileDirectoryOnFtpServer)
         maybeCreateDir.flatMap { _ =>
-          val fUploadRes: Future[IOResult] = sftpDAO.uploadAFileTo(fileUpReq.pathOnDisk, filePathOnFtpServer)
+          val fUploadRes: Future[IOResult] = sftpDAO.uploadAFileTo(tmpFilePath, filePathOnFtpServer)
+          fUploadRes onComplete (r => tmpFilePath.toFile.delete())
           fUploadRes.map {
             _ => FileUploadResponse(status = true, message = "OK")
           }
@@ -78,6 +82,6 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
 
   override def getFile(in: FileGetRequest): Future[FileGetResponse] = {
     logger.info("Getting random file" + in.toProtoString)
-    Future.successful(FileGetResponse(status = true, fileType = "", author = "", timeCreation = 0, pathOnDisk = ""))
+    Future.successful(FileGetResponse(status = true, fileType = "", author = "", timeCreation = 0, null))
   }
 }

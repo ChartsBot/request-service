@@ -1,20 +1,16 @@
 package com.chartsbot.models
 
-import java.io.File
-import java.nio.file.{ Files, Paths }
-import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.alpakka.ftp.FtpFile
-import akka.stream.javadsl.Source
-import akka.stream.{ ActorMaterializer, IOResult, Materializer }
+import akka.stream.IOResult
 import akka.testkit.{ ImplicitSender, TestActors, TestKit }
-import com.chartsbot.util.Util
 import com.chartsbot.{ Binder, InjectorHelper, SftpServerEmbedded }
 import com.typesafe.scalalogging.LazyLogging
 import org.scalatest._
 import org.scalatest.featurespec.AnyFeatureSpecLike
 import org.scalatest.matchers.should.Matchers
 
+import java.io.File
+import java.nio.file.{ Files, Paths }
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -57,8 +53,8 @@ class SftpDaoSpec()
 
       val res = Await.ready(fRes, 1.minute)
       res.onComplete({
-        case Failure(exception) => ""
-        case Success(value) => fail()
+        case Failure(_) => ""
+        case Success(_) => fail()
       })
       println(res)
     }
@@ -96,8 +92,8 @@ class SftpDaoSpec()
       if (f.exists()) fail()
       val res = sftpDAO.removeFile(basePath, fileName)
       res.onComplete({
-        case Failure(exception) => ""
-        case Success(value) => fail()
+        case Failure(_) => ""
+        case Success(_) => fail()
       })
       Await.ready(res, 1.second)
     }
@@ -110,8 +106,8 @@ class SftpDaoSpec()
 
       val res = sftpDAO.createDir(basePath, dirName)
       res.onComplete({
-        case Failure(exception) => fail()
-        case Success(value) => ""
+        case Failure(_) => fail()
+        case Success(_) => ""
       })
       Await.ready(res, 1.second)
       new File(basePath + dirName).delete()
@@ -123,8 +119,8 @@ class SftpDaoSpec()
 
       val res = sftpDAO.createDir("", basePath + "/" + dirName)
       res.onComplete({
-        case Failure(exception) => fail()
-        case Success(value) => ""
+        case Failure(_) => fail()
+        case Success(_) => ""
       })
       Await.ready(res, 1.second)
       new File(basePath + dirName).delete()
@@ -133,12 +129,12 @@ class SftpDaoSpec()
     Scenario("Create dir that already exist -> NOK") {
       val sftpDAO = Injector.get[SftpDAO]
       val dirName = "ohhh/"
-      val dir = Files.createDirectories(Paths.get(basePath + dirName))
+      Files.createDirectories(Paths.get(basePath + dirName))
       Thread.sleep(10)
       val res = sftpDAO.createDir(basePath, dirName)
       res.onComplete({
-        case Failure(exception) => ""
-        case Success(value) => fail()
+        case Failure(_) => ""
+        case Success(_) => fail()
       })
       Await.ready(res, 1.second)
       val dir2 = new File(basePath + dirName)
@@ -167,7 +163,7 @@ class SftpDaoSpec()
       //      println(t)
       val maybeCreateDir = sftpDAO.createDir("", fileDirectoryOnFtpServer)
       val r: Future[String] = maybeCreateDir.flatMap { _ =>
-        val fUploadRes: Future[IOResult] = sftpDAO.uploadAFileTo(imagePath, filePathOnFtpServer)
+        val fUploadRes: Future[IOResult] = sftpDAO.uploadAFileTo(Paths.get(imagePath), filePathOnFtpServer)
         fUploadRes.map {
           _ => ""
         }

@@ -1,18 +1,9 @@
 package com.chartsbot
 
-import akka.{ Done, NotUsed }
 import akka.actor.{ Actor, ActorSystem, Props }
-import akka.stream.{ ActorMaterializer, Materializer }
-import akka.stream.alpakka.ftp.FtpFile
-import akka.stream.alpakka.ftp.scaladsl.Sftp
-import akka.testkit.{ ImplicitSender, TestActors, TestKit }
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.Materializer
 import com.chartsbot.models.SftpDAO
 import com.typesafe.scalalogging.LazyLogging
-
-import scala.collection.immutable
-import scala.concurrent.duration._
-import scala.concurrent.{ Await, Future }
 
 object SftpTest {
 
@@ -42,11 +33,11 @@ class Test extends Actor with LazyLogging {
 
     logger.info("coucou")
 
-    val Injector = new InjectorHelper(List(new Binder {
+    //    val Injector = new InjectorHelper(List(new Binder {
+    //
+    //    })) {}
 
-    })) {}
-
-    val ftpDAO: SftpDAO = Injector.get[SftpDAO]
+    //    val ftpDAO: SftpDAO = Injector.get[SftpDAO]
     //
     //    val res: Source[FtpFile, NotUsed] = ftpDAO.listFiles("home/ben/Documents/tests/playground")
     //

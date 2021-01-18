@@ -4,15 +4,18 @@ import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.{ ConnectionContext, Http, HttpsConnectionContext }
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.pki.pem.{ DERPrivateKeyLoader, PEMDecoder }
+import com.chartsbot.config.ConfigPaths.GrpcPaths
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 
+import java.io.{ BufferedInputStream, FileInputStream }
 import java.security.{ KeyStore, SecureRandom }
 import java.security.cert.{ Certificate, CertificateFactory }
 import javax.inject.{ Inject, Singleton }
 import javax.net.ssl.{ KeyManagerFactory, SSLContext }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
-import scala.io.Source
+import scala.io.{ BufferedSource, Source }
 import scala.util.{ Failure, Success }
 
 trait FileHandlerServer {
@@ -22,7 +25,8 @@ trait FileHandlerServer {
 }
 
 @Singleton
-class DefaultFileHandlerServer @Inject() (fileHandlerSystem: FileHandlerServerSystem, fileHandlerAkkaService: FileHandlerAkkaService) extends FileHandlerServer with LazyLogging {
+class DefaultFileHandlerServer @Inject() (fileHandlerSystem: FileHandlerServerSystem, fileHandlerAkkaService: FileHandlerAkkaService, conf: Config)
+  extends FileHandlerServer with LazyLogging with GrpcPaths {
 
   def run(): Future[Http.ServerBinding] = {
     implicit val sys: ActorSystem[_] = fileHandlerSystem.system
@@ -32,7 +36,7 @@ class DefaultFileHandlerServer @Inject() (fileHandlerSystem: FileHandlerServerSy
       FileHandlerAkkaServiceHandler(fileHandlerAkkaService)
 
     val bound: Future[Http.ServerBinding] = Http(sys)
-      .newServerAt(interface = "127.0.0.1", port = 8080)
+      .newServerAt(interface = conf.getString(GRPC_SERVER_HOST), port = conf.getInt(GRPC_SERVER_PORT))
       .enableHttps(serverHttpContext)
       .bind(service)
       .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds))
@@ -48,14 +52,13 @@ class DefaultFileHandlerServer @Inject() (fileHandlerSystem: FileHandlerServerSy
 
     bound
   }
-  //#server
 
   private def serverHttpContext: HttpsConnectionContext = {
     val privateKey =
       DERPrivateKeyLoader.load(PEMDecoder.decode(readPrivateKeyPem()))
     val fact = CertificateFactory.getInstance("X.509")
     val cer = fact.generateCertificate(
-      classOf[FileHandlerServer].getResourceAsStream("/certs/server1.pem")
+      readFileAsInputStream(conf.getString(GRPC_SERVER_PEM))
     )
     val ks = KeyStore.getInstance("PKCS12")
     ks.load(null)
@@ -72,8 +75,17 @@ class DefaultFileHandlerServer @Inject() (fileHandlerSystem: FileHandlerServerSy
     ConnectionContext.httpsServer(context)
   }
 
-  private def readPrivateKeyPem(): String =
-    Source.fromResource("certs/server1.key").mkString
-  //#server
+  private def readPrivateKeyPem(): String = {
+    println(conf.getString(GRPC_SERVER_KEY))
+    val res: BufferedSource = Source.fromFile(conf.getString(GRPC_SERVER_KEY))
+    val string = res.mkString
+    res.close()
+    string
+  }
+
+  private def readFileAsInputStream(filePath: String) = {
+    val input = new BufferedInputStream(new FileInputStream(filePath))
+    input
+  }
 
 }

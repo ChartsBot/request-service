@@ -1,10 +1,10 @@
 package com.chartsbot.models
 
-import com.chartsbot.{ Binder, InjectorHelper, TestUtils }
 import com.chartsbot.services.{ SqlConnectorForTests, SqliteConnector, TestQueries }
+import com.chartsbot.{ Binder, InjectorHelper, TestUtils }
 import com.google.inject.binder.ScopedBindingBuilder
 import io.getquill.{ Literal, SqliteJdbcContext }
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.featurespec.AnyFeatureSpecLike
 import org.scalatest.matchers.should.Matchers
 

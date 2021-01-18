@@ -1,11 +1,26 @@
 package com.chartsbot.util
 
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.featurespec.AnyFeatureSpecLike
 import org.scalatest.matchers.should.Matchers
+
+import java.nio.file.{ Files, Paths }
 import scala.util.Random
 
 class UtilSpec extends AnyFeatureSpecLike with Matchers {
+
+  Feature("bytes to file") {
+    Scenario("Write a  file") {
+      val image1Path = "src/test/resources/images/dali1.jpg"
+      val image2Path = "src/test/resources/images/dali2.jpg"
+      val image3Path = "src/test/resources/images/dali3.jpg"
+      val imagePathsToHash = List(image1Path, image2Path, image3Path)
+      for (path <- imagePathsToHash) {
+        val fileAsByte = Files.readAllBytes(Paths.get(path))
+        val tmpFile = Util.bytesToFile(fileAsByte)
+        Files.readAllBytes(tmpFile) shouldBe fileAsByte
+      }
+    }
+  }
 
   Feature("word split") {
     Scenario("Split same string should return same result") {
@@ -49,7 +64,7 @@ class UtilSpec extends AnyFeatureSpecLike with Matchers {
       val image2Path = "src/test/resources/images/dali2.jpg"
       val image3Path = "src/test/resources/images/dali3.jpg"
       val imagePathsToHash = List(image1Path, image2Path, image3Path)
-      val hashes = for (path <- imagePathsToHash) yield { Util.imageToWords(path) }
+      val hashes = for (path <- imagePathsToHash) yield { Util.imageToWords(Paths.get(path)) }
       hashes.distinct.length shouldBe imagePathsToHash.length
       println(hashes)
     }

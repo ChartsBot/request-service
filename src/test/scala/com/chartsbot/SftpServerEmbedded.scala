@@ -1,14 +1,13 @@
 package com.chartsbot
 
-import java.nio.file.Paths
-import java.util.Collections
-
-import com.typesafe.config.Config
-import org.apache.sshd.server.session.ServerSession
-import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory
 import org.apache.sshd.server.SshServer
 import org.apache.sshd.server.auth.password.PasswordAuthenticator
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
+import org.apache.sshd.server.session.ServerSession
+import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory
+
+import java.nio.file.Paths
+import java.util.Collections
 
 class SftpServerEmbedded() {
 

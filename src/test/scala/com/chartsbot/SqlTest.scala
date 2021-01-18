@@ -1,13 +1,11 @@
 package com.chartsbot
 
-import com.chartsbot.models.{ SqlFilePath, DefaultSqlFilesDAO }
-import com.chartsbot.services.{ DefaultSqliteConnector, SqlConnectorForTests, SqliteConnector, TestQueries }
+import com.chartsbot.models.{ DefaultSqlFilesDAO, SqlFilePath }
+import com.chartsbot.services.{ SqlConnectorForTests, SqliteConnector, TestQueries }
 import com.google.inject.binder.ScopedBindingBuilder
-import com.typesafe.config.ConfigFactory
-import io.getquill.{ Literal, Query, SnakeCase, SqliteJdbcContext }
-import javax.inject.Inject
+import io.getquill.{ Literal, SqliteJdbcContext }
 
-import scala.collection.JavaConverters._
+import javax.inject.Inject
 import scala.util.Random
 
 object SqlTest {

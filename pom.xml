@@ -37,7 +37,7 @@
         <!-- versions -->
 
         <scala.logging.version>3.9.2</scala.logging.version>
-        <typesafe.config>1.3.4</typesafe.config>
+        <typesafe.config>1.4.1</typesafe.config>
         <slf4j-api.version>1.7.25</slf4j-api.version>
         <scala-logging.version>3.9.2</scala-logging.version>
         <logback-classic.version>1.2.3</logback-classic.version>
@@ -616,34 +616,34 @@
 
             </plugin>
 
-            <!-- create and/or push the created docker image -->
-<!--            <plugin>-->
-<!--                <groupId>com.spotify</groupId>-->
-<!--                <artifactId>dockerfile-maven-plugin</artifactId>-->
-<!--                <version>${dockerfile-maven-plugin.version}</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>default</id>-->
-<!--                        <goals>-->
-<!--                            <goal>build</goal>-->
-<!--                            <goal>push</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <buildDirectory>${project.build.outputDirectory}</buildDirectory>-->
-<!--                    <repository>chartsbot/chartsbot-request-service</repository>-->
-<!--                    <tag>${build.number}</tag>-->
-<!--                    <buildArgs>-->
-<!--                        <VERSION>${project.version}</VERSION>-->
-<!--                        <BUILD>${build.number}</BUILD>-->
-<!--                        <SERVICE_NAME>${project.name}</SERVICE_NAME>-->
-<!--                        <JAR_LIBS>target/lib</JAR_LIBS>-->
-<!--                        <SWAGGER_UI>src/main/swagger-ui</SWAGGER_UI>-->
-<!--                        <JAR_FILE>target/${project.build.finalName}.${project.packaging}</JAR_FILE>-->
-<!--                    </buildArgs>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+<!--             create and/or push the created docker image-->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <buildDirectory>${project.build.outputDirectory}</buildDirectory>
+                    <repository>fomoinc/fomobot-file-handler</repository>
+                    <tag>${build.number}</tag>
+                    <tag>latest</tag>
+                    <buildArgs>
+                        <VERSION>${project.version}</VERSION>
+                        <BUILD>${build.number}</BUILD>
+                        <SERVICE_NAME>${project.name}</SERVICE_NAME>
+                        <JAR_LIBS>target/lib</JAR_LIBS>
+                        <JAR_FILE>target/${project.build.finalName}.${project.packaging}</JAR_FILE>
+                    </buildArgs>
+                </configuration>
+            </plugin>
 
         </plugins>
     </build>

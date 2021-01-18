@@ -3,7 +3,8 @@ package com.chartsbot.util
 import akka.util.ByteString
 import com.chartsbot.models.SqlFilePath
 
-import java.io.{ File, FileInputStream }
+import java.io.FileInputStream
+import java.nio.file.{ Files, Path }
 import scala.io.Source
 import scala.math.abs
 
@@ -16,8 +17,14 @@ object Util {
 
   val imageHasher = new ImageHash()
 
-  def imageToWords(imagePath: String): String = {
-    val fisImage = new FileInputStream(new File(imagePath))
+  def bytesToFile(fileAsBytes: Array[Byte]): Path = {
+    val path = Files.createTempFile("pre-", "tmp")
+    Files.write(path, fileAsBytes)
+    path
+  }
+
+  def imageToWords(imagePath: Path): String = {
+    val fisImage = new FileInputStream(imagePath.toFile)
     val hash = imageHasher.getHash(fisImage)
     fisImage.close()
     stringToRandomWords(hash) match {

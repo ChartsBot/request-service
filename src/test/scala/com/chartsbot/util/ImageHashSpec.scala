@@ -1,10 +1,9 @@
 package com.chartsbot.util
 
-import java.io.{ File, FileInputStream }
-
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.featurespec.AnyFeatureSpecLike
 import org.scalatest.matchers.should.Matchers
+
+import java.io.{ File, FileInputStream }
 
 class ImageHashSpec extends AnyFeatureSpecLike with Matchers {
 

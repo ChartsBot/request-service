@@ -2,7 +2,7 @@ package com.chartsbot.services
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.Config
 
 import javax.inject.{ Inject, Singleton }
 
@@ -11,10 +11,8 @@ trait FileHandlerServerSystem {
 }
 
 @Singleton
-class DefaultFileHandlerServerSystem @Inject() () extends FileHandlerServerSystem {
+class DefaultFileHandlerServerSystem @Inject() (config: Config) extends FileHandlerServerSystem {
 
-  val conf: Config = ConfigFactory.parseString("akka.http.server.preview.enable-http2 = on")
-    .withFallback(ConfigFactory.defaultApplication())
-  val system: ActorSystem[Nothing] = ActorSystem[Nothing](Behaviors.empty, "FileHandlerServer", conf)
+  val system: ActorSystem[Nothing] = ActorSystem[Nothing](Behaviors.empty, "FileHandlerServer", config)
 
 }

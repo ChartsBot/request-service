@@ -8,7 +8,7 @@ import akka.util.ByteString
 import akka.{ Done, NotUsed }
 import com.chartsbot.services.SftpConnector
 
-import java.nio.file.{ Path, Paths }
+import java.nio.file.Path
 import javax.inject.{ Inject, Singleton }
 import scala.collection.immutable
 import scala.concurrent.Future
@@ -50,9 +50,9 @@ class SftpDAO @Inject() (val sftpQueries: SftpQueries) {
     sftpQueries.mkdir(basePath, name).runWith(Sink.seq)
   }
 
-  def uploadAFileTo(pathFile: String, pathTo: String)(implicit materializer: Materializer): Future[IOResult] = {
+  def uploadAFileTo(pathFile: Path, pathTo: String)(implicit materializer: Materializer): Future[IOResult] = {
     //    val fileAsByteStream = Util.fileToByteStr(pathFile)
-    FileIO.fromPath(Paths.get(pathFile))
+    FileIO.fromPath(pathFile)
       .runWith(sftpQueries.toPath(pathTo))
     //    Source
     //      .single(fileAsByteStream)

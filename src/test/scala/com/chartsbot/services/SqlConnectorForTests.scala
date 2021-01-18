@@ -1,11 +1,9 @@
 package com.chartsbot.services
 
-import com.chartsbot.models.SqlFilePath
 import com.typesafe.config.{ Config, ConfigFactory }
-import io.getquill.mirrorContextWithQueryProbing.{ InfixInterpolator, query, quote, schemaMeta }
-import io.getquill.{ Literal, Query, SqliteJdbcContext, mirrorContextWithQueryProbing }
-import javax.inject.{ Inject, Singleton }
+import io.getquill.{ Literal, SqliteJdbcContext }
 
+import javax.inject.{ Inject, Singleton }
 import scala.collection.JavaConverters._
 
 @Singleton
