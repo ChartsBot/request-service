@@ -52,9 +52,13 @@ object SqlTest {
 
     val res2_1 = Await.ready(t.addFile(toInject), 10.second)
 
-    res2_1 match {
-      case Future.never =>
-      case _ =>
+    res2_1 map {
+      case Left(value) =>
+        println("left")
+        println(value)
+      case Right(value) =>
+        println("right")
+        println(value)
     }
 
     println(res2_1.value)
@@ -91,6 +95,14 @@ object SqlTest {
 
     val res5 = Await.result(t.selectAll(), 10.second)
     println(res5)
+
+    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map {
+      case None =>
+        println("none")
+      case Some(value) =>
+        println("some")
+        println(value)
+    }
 
     println("hey now, you're a rock star")
     //    val testClass = new TestClass(Injector.get[SqliteConnector])

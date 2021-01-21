@@ -6,8 +6,6 @@ import com.github.mauricio.async.db.mysql.message.server.ErrorMessage
 import com.typesafe.scalalogging.LazyLogging
 import io.getquill.{ CamelCase, Literal, MysqlAsyncContext, SqliteJdbcContext }
 
-import java.sql.Timestamp
-import java.time.Instant
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
@@ -22,13 +20,14 @@ class SqlFiles @Inject() (val sqlConnector: MySQLConnector, implicit val ec: Exe
   implicit val eventSchemaMeta: SchemaMeta[SqlFilePath] = schemaMeta[SqlFilePath]("FilesPaths")
 
   def transformFuture[T](future: Future[Right[Nothing, T]], errorLog: String): Future[Either[ErrorMessage, T]] = {
-    future transform {
-      case s @ Success(_) => s
+
+    future transformWith {
+      case Success(value) => Future.successful(value)
       case Failure(exception) =>
         exception match {
           case e: MySQLException =>
             logger.info(errorLog + e.errorMessage.toString)
-            Success(Left(e.errorMessage))
+            Future.successful(Left(e.errorMessage))
         }
     }
   }
@@ -38,18 +37,8 @@ class SqlFiles @Inject() (val sqlConnector: MySQLConnector, implicit val ec: Exe
   }
 
   def insertFile(filePath: SqlFilePath): Future[Either[ErrorMessage, Long]] = {
-    val f = run(quote(query[SqlFilePath].insert(lift(filePath)))).map(Right(_))
+    val f: Future[Right[Nothing, Long]] = run(quote(query[SqlFilePath].insert(lift(filePath)))).map(Right(_))
     transformFuture(f, "SQL error inserting file ")
-    //    val a = f transform {
-    //      case s @ Success(_) => s
-    //      case Failure(exception) =>
-    //        exception match {
-    //          case e: MySQLException =>
-    //            logger.info("SQL error inserting file " + e.errorMessage.toString)
-    //            Success(Left(e.errorMessage))
-    //        }
-    //    }
-    //    a
   }
 
   def dropFile(chatId: Int, fileType: String, the_fileName: String): Future[Either[ErrorMessage, Long]] = {
@@ -97,14 +86,6 @@ class DefaultSqlFilesDAO @Inject() (val sqlFiles: SqlFiles, implicit val ec: Exe
         val randomSelect = x(scala.util.Random.nextInt(x.length))
         Some(randomSelect)
     }
-    //    maybeFile match {
-    //      case Failure(exception) =>
-    //        logger.error("SQLFILESDAO - While trying to get random file, error appeared: ", exception)
-    //        None
-    //      case Success(filesPaths) =>
-    //        val randomSelect = filesPaths(scala.util.Random.nextInt(filesPaths.length))
-    //        Some(randomSelect)
-    //    }
   }
 
 }

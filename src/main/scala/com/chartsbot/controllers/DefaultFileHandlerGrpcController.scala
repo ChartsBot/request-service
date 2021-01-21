@@ -12,7 +12,7 @@ import com.google.protobuf.ByteString
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 
-import java.nio.file.Files
+import java.nio.file.{ Files, Path }
 import java.sql.Timestamp
 import javax.inject.{ Inject, Singleton }
 import scala.collection.immutable
@@ -29,12 +29,17 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
   override def uploadFile(fileUpReq: FileUploadRequest): Future[FileUploadResponse] = {
     logger.info("Uploading file on " + fileUpReq.chatTitle + " by " + fileUpReq.author)
 
-    val tmpFilePath = Util.bytesToFile(fileUpReq.file.toByteArray)
+    val tmpFilePath: Path = Util.bytesToFile(fileUpReq.file.toByteArray)
 
     val fileName: String = fileUpReq.fileType.toLowerCase match {
       case "image" =>
         Util.imageToWords(tmpFilePath) + ".jpg"
-      case "video" => "aaa" + ".mp4"
+      case "video" =>
+        val name = Util.stringToRandomWords(Files.size(tmpFilePath).toString) match {
+          case Left(_) => "null"
+          case Right(value) => value.mkString("")
+        }
+        name + ".mp4"
     }
 
     val sqlFileDescription = SqlFilePath(
@@ -55,16 +60,22 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
       case Right(_) =>
         // try to create the directory if it doesn't exist
         val maybeCreateDir: Future[immutable.Seq[Done]] = sftpDAO.createDir("", fileDirectoryOnFtpServer)
-        val q = maybeCreateDir.flatMap { _ =>
+        maybeCreateDir.flatMap { _ =>
           val fUploadRes: Future[IOResult] = sftpDAO.uploadAFileTo(tmpFilePath, filePathOnFtpServer)
           fUploadRes onComplete (r => tmpFilePath.toFile.delete())
           fUploadRes.map {
             _ => FileUploadResponse(status = true, message = fileName.dropRight(4))
           }
         }
-        q
+
       case Left(errorMessage) =>
-        Future.successful(FileUploadResponse(status = false, message = errorMessage.errorMessage))
+        logger.info(errorMessage.errorCode + " - " + errorMessage.toString)
+        errorMessage.errorCode match {
+          case 1062 => Future.successful(FileUploadResponse(status = false, message = "Meme already exist as " + fileName))
+          case x =>
+            logger.error("SQL - Error storing meme on SQL table: " + errorMessage.errorCode + " " + errorMessage.errorMessage)
+            Future.successful(FileUploadResponse(status = false, message = s"Unexpected error (code $x)."))
+        }
     }
     r.flatten
   }
@@ -81,14 +92,15 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
       fileType = in.fileType,
       fileName = in.name
     )
+    // todo: add sftp query
     Future.successful(FileDeleteResponse(status = true, message = "deleted"))
   }
 
   override def getFile(in: FileGetRequest): Future[FileGetResponse] = {
     logger.info("Getting random file " + in.toProtoString)
-    sqlDao.getRandomFileFromChatOfType(in.chatId, in.fileClassification) map {
+    val r = sqlDao.getRandomFileFromChatOfType(in.chatId, in.fileClassification) map {
       case Some(file) =>
-        val remotePath = config.getString(FTP_BASE_DIR) + '/' + in.chatId.toString + '/' + in.fileClassification + '/' + file.fileType + '/' + file.fileName
+        val remotePath = config.getString(FTP_BASE_DIR) + '/' + Util.fileDirectoryFromQuery(file) + file.fileName
         val localPath = Files.createTempFile("pre-", "tmp")
         val fDownRes = sftpDAO.downloadAFileTo(remotePath, localPath)
         val fResponse = for {
@@ -96,7 +108,7 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
         } yield {
           val fileAsByte = Files.readAllBytes(localPath) // TODO: check if file isn't null
           FileGetResponse(
-            status = false,
+            status = true,
             fileType = file.fileType,
             author = file.author,
             timeCreation = file.timeCreation,
@@ -105,9 +117,21 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
           )
         }
         fResponse.onComplete { _ => localPath.toFile.delete() }
+        logger.info("Sending dank meme " + file.fileName)
+        fResponse
       case None =>
-        FileGetResponse(status = false, fileType = "No meme found", author = "", timeCreation = 0, null)
+        logger.info("No meme found...")
+        Future.successful(
+          FileGetResponse(
+            status = false,
+            fileType = "No meme found",
+            author = "",
+            timeCreation = 0,
+            name = "none", // those 2 variables are non empty otherwise grpc doesn't like it
+            ByteString.copyFrom("null".getBytes())
+          )
+        )
     }
-    Future.successful(FileGetResponse(status = true, fileType = "", author = "", timeCreation = 0, null))
+    r.flatten
   }
 }
