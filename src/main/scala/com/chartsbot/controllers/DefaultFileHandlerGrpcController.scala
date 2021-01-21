@@ -7,9 +7,13 @@ import com.chartsbot.config.ConfigPaths.FtpPaths
 import com.chartsbot.models.{ SftpDAO, SqlFilePath, SqlFilesDAO }
 import com.chartsbot.services._
 import com.chartsbot.util.Util
+import com.github.mauricio.async.db.mysql.message.server.ErrorMessage
+import com.google.protobuf.ByteString
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 
+import java.nio.file.Files
+import java.sql.Timestamp
 import javax.inject.{ Inject, Singleton }
 import scala.collection.immutable
 import scala.concurrent.{ ExecutionContext, Future }
@@ -46,23 +50,23 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
     val fileDirectoryOnFtpServer = config.getString(FTP_BASE_DIR) + "/" + Util.fileDirectoryFromQuery(sqlFileDescription)
     val filePathOnFtpServer = fileDirectoryOnFtpServer + sqlFileDescription.fileName
 
-    // try to create the directory if it doesn't exist
-
-    val resUploadSql: Try[Long] = Try(1) //sqlDao.addFile(sqlFileDescription)
-    resUploadSql match {
-      case Failure(e) =>
-        logger.info("Error storing file in SQL: ", e)
-        Future.successful(FileUploadResponse(status = false, message = "Image already exist"))
-      case Success(_) =>
+    val resUploadSql: Future[Either[ErrorMessage, Long]] = sqlDao.addFile(sqlFileDescription)
+    val r = resUploadSql map {
+      case Right(_) =>
+        // try to create the directory if it doesn't exist
         val maybeCreateDir: Future[immutable.Seq[Done]] = sftpDAO.createDir("", fileDirectoryOnFtpServer)
-        maybeCreateDir.flatMap { _ =>
+        val q = maybeCreateDir.flatMap { _ =>
           val fUploadRes: Future[IOResult] = sftpDAO.uploadAFileTo(tmpFilePath, filePathOnFtpServer)
           fUploadRes onComplete (r => tmpFilePath.toFile.delete())
           fUploadRes.map {
-            _ => FileUploadResponse(status = true, message = "OK")
+            _ => FileUploadResponse(status = true, message = fileName.dropRight(4))
           }
         }
+        q
+      case Left(errorMessage) =>
+        Future.successful(FileUploadResponse(status = false, message = errorMessage.errorMessage))
     }
+    r.flatten
   }
 
   override def greet(request: SayHelloMessage): Future[SayHelloMessage] = {
@@ -81,7 +85,29 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
   }
 
   override def getFile(in: FileGetRequest): Future[FileGetResponse] = {
-    logger.info("Getting random file" + in.toProtoString)
+    logger.info("Getting random file " + in.toProtoString)
+    sqlDao.getRandomFileFromChatOfType(in.chatId, in.fileClassification) map {
+      case Some(file) =>
+        val remotePath = config.getString(FTP_BASE_DIR) + '/' + in.chatId.toString + '/' + in.fileClassification + '/' + file.fileType + '/' + file.fileName
+        val localPath = Files.createTempFile("pre-", "tmp")
+        val fDownRes = sftpDAO.downloadAFileTo(remotePath, localPath)
+        val fResponse = for {
+          _ <- fDownRes
+        } yield {
+          val fileAsByte = Files.readAllBytes(localPath) // TODO: check if file isn't null
+          FileGetResponse(
+            status = false,
+            fileType = file.fileType,
+            author = file.author,
+            timeCreation = file.timeCreation,
+            name = file.fileName.dropRight(4),
+            file = ByteString.copyFrom(fileAsByte)
+          )
+        }
+        fResponse.onComplete { _ => localPath.toFile.delete() }
+      case None =>
+        FileGetResponse(status = false, fileType = "No meme found", author = "", timeCreation = 0, null)
+    }
     Future.successful(FileGetResponse(status = true, fileType = "", author = "", timeCreation = 0, null))
   }
 }

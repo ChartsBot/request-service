@@ -7,7 +7,9 @@ object ConfigPaths {
   }
 
   trait SqlPaths {
-    final val SQLITE_CONNECTION_PATH = "sql.connection.path"
+    final val MYSQL_CONNECTION_PATH = "sql.connection.path"
+    final val MYSQL_CONNECTION_USERNAME = "sql.connection.username"
+    final val MYSQL_CONNECTION_PASSWORD = "sql.connection.password"
   }
 
   trait FtpPaths {

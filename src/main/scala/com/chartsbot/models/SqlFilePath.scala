@@ -1,7 +1,10 @@
 package com.chartsbot.models
 
+import java.sql.Timestamp
+
 /**
   * Describe the row of the FilesPaths table
+  *
   * @param chatId Int, the chatId of the stored thingy
   * @param fileClassification Type of file: could be a meme, or a flyer, or something else
   * @param fileType Image, audio, video, ...
@@ -17,5 +20,11 @@ case class SqlFilePath(
     fileName: String,
     author: String,
     timeCreation: Int
-)
+) {
+  override def toString: String = {
+    "chatId -> " + chatId + " - chatTitle " + chatTitle + " - fileClassification -> " +
+      fileClassification + " - fileType -> " + fileType +
+      " - fileName -> " + fileName + " - author -> " + author + " - timeCreation -> " + timeCreation
+  }
+}
 

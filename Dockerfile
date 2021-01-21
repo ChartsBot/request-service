@@ -9,7 +9,8 @@ LABEL "com.fomotbot.service"="${SERVICE_NAME}"
 LABEL "com.fomobot.version"="${VERSION}"
 LABEL "com.fomobot.build"="${BUILD}"
 
-EXPOSE 8080
+EXPOSE 8081
+EXPOSE 3306
 EXPOSE 9010
 EXPOSE 9020
 EXPOSE 4321

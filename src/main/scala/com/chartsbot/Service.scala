@@ -10,9 +10,6 @@ object Service extends InjectorHelper(List(new Binder)) {
     val environmentVars = System.getenv().asScala
     for ((k, v) <- environmentVars) println(s"envVar: $k, value: $v")
 
-    val properties = System.getProperties().asScala
-    for ((k, v) <- properties) println(s"key: $k, value: $v")
-
     get[FileHandlerServer].run()
   }
 

@@ -88,7 +88,7 @@
 
         <guice.version>4.2.3</guice.version>
 
-        <quill.version>3.5.3</quill.version>
+        <quill.version>3.6.0</quill.version>
 
         <akka-ftp.version>2.0.2</akka-ftp.version>
         <akka.version>2.6.10</akka.version>
@@ -169,11 +169,11 @@
 
         <!-- Scalatra -->
 
-        <dependency>
-            <groupId>org.scalatra</groupId>
-            <artifactId>scalatra_2.12</artifactId>
-            <version>${scalatra.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.scalatra</groupId>-->
+<!--            <artifactId>scalatra_2.12</artifactId>-->
+<!--            <version>${scalatra.version}</version>-->
+<!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/org.scalatest/scalatest -->
         <dependency>
@@ -190,11 +190,11 @@
             <version>${scalactic.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.scalatra</groupId>
-            <artifactId>scalatra-swagger_${scala.compact.version}</artifactId>
-            <version>${scalatraSwagger.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.scalatra</groupId>-->
+<!--            <artifactId>scalatra-swagger_${scala.compact.version}</artifactId>-->
+<!--            <version>${scalatraSwagger.version}</version>-->
+<!--        </dependency>-->
 
         <!-- /Scalatra -->
 
@@ -251,6 +251,39 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.32.3.2</version>
         </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/io.getquill/quill-async-mysql -->
+        <dependency>
+            <groupId>io.getquill</groupId>
+            <artifactId>quill-async-mysql_2.12</artifactId>
+            <version>${quill.version}</version>
+        </dependency>
+
+
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/mysql/mysql-connector-java &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>mysql</groupId>-->
+<!--            <artifactId>mysql-connector-java</artifactId>-->
+<!--            <version>8.0.22</version>-->
+<!--        </dependency>-->
+
+    <!--        TEST embedded mysql-->
+
+        <dependency>
+            <groupId>com.wix</groupId>
+            <artifactId>wix-embedded-mysql</artifactId>
+            <version>4.6.1</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+
 
 
         <!-- Guice -->

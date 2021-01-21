@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext
 
 class Binder extends AbstractModule {
 
-  def SqlClient: ScopedBindingBuilder = bind(classOf[SqliteConnector]).to(classOf[DefaultSqliteConnector])
+  def SqlClient: ScopedBindingBuilder = bind(classOf[MySQLConnector]).to(classOf[DefaultMySQLConnector])
   def Config: ScopedBindingBuilder = bind(classOf[Config]).toProvider(classOf[ConfigProvider])
   def ExecutionContext: ScopedBindingBuilder = bind(classOf[ExecutionContext]).toProvider(classOf[ExecutionProvider])
   def FileHandlerServerSystem: ScopedBindingBuilder = bind(classOf[FileHandlerServerSystem]).to(classOf[DefaultFileHandlerServerSystem])

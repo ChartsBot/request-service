@@ -1,33 +1,27 @@
 package com.chartsbot
 
 import com.chartsbot.models.{ DefaultSqlFilesDAO, SqlFilePath }
-import com.chartsbot.services.{ SqlConnectorForTests, SqliteConnector, TestQueries }
+import com.chartsbot.services.{ DefaultMySQLConnector, MySQLConnector, SqlConnectorForTests, TestQueries }
 import com.google.inject.binder.ScopedBindingBuilder
-import io.getquill.{ Literal, SqliteJdbcContext }
+import io.getquill.{ CamelCase, Literal, MysqlAsyncContext, SqliteJdbcContext }
 
 import javax.inject.Inject
-import scala.util.Random
+import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.duration._
+import scala.util.{ Failure, Random, Success }
 
 object SqlTest {
   def main(args: Array[String]): Unit = {
 
     val Injector = new InjectorHelper(List(new Binder {
-      override def SqlClient: ScopedBindingBuilder = bind(classOf[SqliteConnector]).to(classOf[SqlConnectorForTests])
+      override def SqlClient: ScopedBindingBuilder = bind(classOf[MySQLConnector]).to(classOf[DefaultMySQLConnector])
     })) {}
 
-    val sqlConnector: SqliteConnector = Injector.get[SqliteConnector]
-
-    val ctx: SqliteJdbcContext[Literal.type] = sqlConnector.ctx
-
-    import ctx._
-
-    implicit val eventSchemaMeta: ctx.SchemaMeta[SqlFilePath] = schemaMeta[SqlFilePath]("FilesPaths")
-
-    ctx.executeAction(TestQueries.createTable)
+    implicit val ec: ExecutionContext = Injector.get[ExecutionContext]
 
     val t = Injector.get[DefaultSqlFilesDAO]
 
-    val res = t.selectAll()
+    val res = Await.result(t.selectAll(), 10.second)
 
     println(res)
     val toInject = SqlFilePath(
@@ -40,19 +34,56 @@ object SqlTest {
       timeCreation = 1112345
     )
 
-    val res2 = t.addFile(toInject)
-    println(res2)
-    val res2_1 = t.addFile(toInject)
-    println(res2_1)
+    val toInject2 = SqlFilePath(
+      chatId = Random.nextInt(10000),
+      chatTitle = "none",
+      fileClassification = "meme",
+      fileType = "image",
+      fileName = "coucou",
+      author = "moi",
+      timeCreation = 1112345
+    )
 
-    val res3 = t.selectAll()
+    val res2 = Await.result(t.addFile(toInject), 10.second)
+    Await.result(t.addFile(toInject2), 10.second)
+    //    println(res2)
+    println("passed 1")
+    //    val res2_1000 = Await.result(t.addFile(toInject), 10.second)
+
+    val res2_1 = Await.ready(t.addFile(toInject), 10.second)
+
+    res2_1 match {
+      case Future.never =>
+      case _ =>
+    }
+
+    println(res2_1.value)
+    //    println(res2_1)
+    println("GETTING MEME FROM CHATID " + toInject.chatId)
+    val grht = Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second)
+
+    grht map { case None =>
+    case Some(value) => println(value)}
+    Thread.sleep(1000)
+    println("GOT MEME")
+    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map { case None =>
+    case Some(value) => println(value)}
+    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map { case None =>
+    case Some(value) => println(value)}
+    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map { case None =>
+    case Some(value) => println(value)}
+    val res3 = Await.result(t.selectAll(), 10.second)
     println(res3)
 
-    val res4 = t.deleteFile(toInject.chatId, toInject.fileType, toInject.fileName)
+    val res4 = Await.result(t.deleteFile(toInject.chatId, toInject.fileType, toInject.fileName), 10.second)
     println(res4)
 
-    val res5 = t.selectAll()
+    val res4_bis = Await.result(t.deleteFile(toInject.chatId, toInject.fileType, toInject.fileName), 10.second)
+    println(res4_bis)
+
+    val res5 = Await.result(t.selectAll(), 10.second)
     println(res5)
+
     println("hey now, you're a rock star")
     //    val testClass = new TestClass(Injector.get[SqliteConnector])
     //    testClass.doStuff()
@@ -60,7 +91,7 @@ object SqlTest {
 
 }
 
-class TestClass @Inject() (sqlConnector: SqliteConnector) {
+class TestClass @Inject() (sqlConnector: MySQLConnector, implicit val ec: ExecutionContext) {
 
   import sqlConnector.ctx._
 

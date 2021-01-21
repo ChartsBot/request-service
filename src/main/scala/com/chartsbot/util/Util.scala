@@ -10,8 +10,8 @@ import scala.math.abs
 
 object Util {
 
-  val dicAdjPath = "src/main/resources/words/adjectives.txt"
-  val dicAnimalsPath = "src/main/resources/words/animals.txt"
+  val dicAdjPath = Source.fromURL(getClass.getResource("/words/adjectives.txt"))
+  val dicAnimalsPath = Source.fromURL(getClass.getResource("/words/animals.txt"))
   val dicAdjectives: List[String] = getLinesFromFile(dicAdjPath)
   val dicAnimals: List[String] = getLinesFromFile(dicAnimalsPath)
 
@@ -63,10 +63,8 @@ object Util {
 
   }
 
-  def getLinesFromFile(filepath: String): List[String] = {
-    val bufferedSource = Source.fromFile(filepath)
-    val lines = bufferedSource.getLines().toList
-    bufferedSource.close
+  def getLinesFromFile(file: Source): List[String] = {
+    val lines = file.getLines().toList
     lines
   }
 
