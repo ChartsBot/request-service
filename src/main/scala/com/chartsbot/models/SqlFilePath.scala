@@ -1,7 +1,5 @@
 package com.chartsbot.models
 
-import java.sql.Timestamp
-
 /**
   * Describe the row of the FilesPaths table
   *

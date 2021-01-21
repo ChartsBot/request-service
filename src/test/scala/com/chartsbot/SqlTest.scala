@@ -62,16 +62,24 @@ object SqlTest {
     println("GETTING MEME FROM CHATID " + toInject.chatId)
     val grht = Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second)
 
-    grht map { case None =>
-    case Some(value) => println(value)}
+    grht map {
+      case None =>
+      case Some(value) => println(value)
+    }
     Thread.sleep(1000)
     println("GOT MEME")
-    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map { case None =>
-    case Some(value) => println(value)}
-    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map { case None =>
-    case Some(value) => println(value)}
-    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map { case None =>
-    case Some(value) => println(value)}
+    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map {
+      case None =>
+      case Some(value) => println(value)
+    }
+    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map {
+      case None =>
+      case Some(value) => println(value)
+    }
+    Await.ready(t.getRandomFileFromChatOfType(toInject.chatId, toInject.fileClassification), 10.second) map {
+      case None =>
+      case Some(value) => println(value)
+    }
     val res3 = Await.result(t.selectAll(), 10.second)
     println(res3)
 
