@@ -4,11 +4,11 @@ import com.chartsbot.services.MySQLConnector
 import com.github.mauricio.async.db.mysql.exceptions.MySQLException
 import com.github.mauricio.async.db.mysql.message.server.ErrorMessage
 import com.typesafe.scalalogging.LazyLogging
-import io.getquill.{ CamelCase, Literal, MysqlAsyncContext, SqliteJdbcContext }
+import io.getquill.{ CamelCase, MysqlAsyncContext }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Success }
 
 @Singleton
 class SqlFiles @Inject() (val sqlConnector: MySQLConnector, implicit val ec: ExecutionContext) extends LazyLogging {
@@ -41,15 +41,15 @@ class SqlFiles @Inject() (val sqlConnector: MySQLConnector, implicit val ec: Exe
     transformFuture(f, "SQL error inserting file ")
   }
 
-  def dropFile(chatId: Int, fileType: String, the_fileName: String): Future[Either[ErrorMessage, Long]] = {
-    val f = run(quote(query[SqlFilePath]
+  def dropFile(chatId: Long, fileType: String, the_fileName: String): Future[Either[ErrorMessage, Long]] = {
+    val f: Future[Right[Nothing, Long]] = run(quote(query[SqlFilePath]
       .filter(f => f.chatId == lift(chatId) && f.fileName == lift(the_fileName) && f.fileType == lift(fileType))
       .delete))
       .map(Right(_))
     transformFuture(f, "SQL error dropping file ")
   }
 
-  def getAllFilesChat(chatId: Int, fileClassification: String): Future[List[SqlFilePath]] = {
+  def getAllFilesChat(chatId: Long, fileClassification: String): Future[List[SqlFilePath]] = {
 
     run(quote(query[SqlFilePath].filter(f => f.chatId == lift(chatId) && f.fileClassification == lift(fileClassification))))
 
@@ -62,9 +62,9 @@ trait SqlFilesDAO {
 
   def addFile(filePath: SqlFilePath): Future[Either[ErrorMessage, Long]]
 
-  def deleteFile(chatId: Int, fileType: String, fileName: String): Future[Either[ErrorMessage, Long]]
+  def deleteFile(chatId: Long, fileType: String, fileName: String): Future[Either[ErrorMessage, Long]]
 
-  def getRandomFileFromChatOfType(chatId: Int, fileClassification: String): Future[Option[SqlFilePath]]
+  def getRandomFileFromChatOfType(chatId: Long, fileClassification: String): Future[Option[SqlFilePath]]
 }
 
 @Singleton
@@ -74,11 +74,11 @@ class DefaultSqlFilesDAO @Inject() (val sqlFiles: SqlFiles, implicit val ec: Exe
 
   def addFile(filePath: SqlFilePath): Future[Either[ErrorMessage, Long]] = sqlFiles.insertFile(filePath)
 
-  def deleteFile(chatId: Int, fileType: String, fileName: String): Future[Either[ErrorMessage, Long]] = {
+  def deleteFile(chatId: Long, fileType: String, fileName: String): Future[Either[ErrorMessage, Long]] = {
     sqlFiles.dropFile(chatId, fileType, fileName)
   }
 
-  def getRandomFileFromChatOfType(chatId: Int, fileClassification: String): Future[Option[SqlFilePath]] = {
+  def getRandomFileFromChatOfType(chatId: Long, fileClassification: String): Future[Option[SqlFilePath]] = {
     val fMaybeFile = sqlFiles.getAllFilesChat(chatId, fileClassification)
     fMaybeFile.map {
       case Nil => None

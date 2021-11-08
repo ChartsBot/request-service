@@ -11,7 +11,7 @@ package com.chartsbot.models
   * @param timeCreation Epoch seconds of the file creation
   */
 case class SqlFilePath(
-    chatId: Int,
+    chatId: Long,
     chatTitle: String,
     fileClassification: String,
     fileType: String,

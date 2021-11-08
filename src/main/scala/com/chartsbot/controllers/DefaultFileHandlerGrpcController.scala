@@ -64,7 +64,7 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
           val fUploadRes: Future[IOResult] = sftpDAO.uploadAFileTo(tmpFilePath, filePathOnFtpServer)
           fUploadRes onComplete (r => tmpFilePath.toFile.delete())
           fUploadRes.map {
-            _ => FileUploadResponse(status = true, message = fileName.dropRight(4))
+            _ => FileUploadResponse(status = true, message = fileName)
           }
         }
 
@@ -91,9 +91,21 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
       chatId = in.chatId,
       fileType = in.fileType,
       fileName = in.name
-    )
-    // todo: add sftp query
-    Future.successful(FileDeleteResponse(status = true, message = "deleted"))
+    ) flatMap {
+      case Right(_) =>
+        val fileDirectory = config.getString(FTP_BASE_DIR) + "/" + Util.fileDirectoryFromQuery(in.chatId, in.fileClassification, in.fileType)
+        logger.info("Deleting file " + in.name + " in dir " + fileDirectory)
+        sftpDAO.removeFile(fileDirectory, in.name) map { _ =>
+          FileDeleteResponse(status = true, message = "file deleted")
+        }
+      case Left(errorMessage) =>
+        logger.info(errorMessage.errorCode + " - " + errorMessage.toString)
+        errorMessage.errorCode match {
+          case x =>
+            logger.error("SQL - Error deleting meme on SQL table: " + errorMessage.errorCode + " " + errorMessage.errorMessage)
+            Future.successful(FileDeleteResponse(status = false, message = s"Unexpected error when deleting meme. Please contact rottedben (code $x)."))
+        }
+    }
   }
 
   override def getFile(in: FileGetRequest): Future[FileGetResponse] = {
@@ -112,7 +124,7 @@ class DefaultFileHandlerGrpcController @Inject() (fileHandlerSystem: FileHandler
             fileType = file.fileType,
             author = file.author,
             timeCreation = file.timeCreation,
-            name = file.fileName.dropRight(4),
+            name = file.fileName,
             file = ByteString.copyFrom(fileAsByte)
           )
         }

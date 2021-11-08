@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS FilesPaths (
-    chatId INT NOT NULL,
+    chatId BIGINT NOT NULL,
     chatTitle VARCHAR(128),
     fileClassification VARCHAR(128) NOT NULL,
     fileType VARCHAR(128) NOT NULL,

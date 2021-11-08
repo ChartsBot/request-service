@@ -80,4 +80,8 @@ object Util {
     chatId + '/' + sqlFilePath.fileClassification + '/' + sqlFilePath.fileType + '/'
   }
 
+  def fileDirectoryFromQuery(chatId: Long, fileClassification: String, fileType: String): String = {
+    chatId.abs.toString + '/' + fileClassification + '/' + fileType + '/'
+  }
+
 }

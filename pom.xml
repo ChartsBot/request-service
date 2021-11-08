@@ -48,15 +48,11 @@
 
         <scalatest.version>3.2.3</scalatest.version>
         <scalactic.version>3.2.3</scalactic.version>
-        <!--scalatra-->
-        <scalatra.version>2.6.5</scalatra.version>
-        <scalatraSwagger.version>2.6.5</scalatraSwagger.version>
 
 
         <javaxServlet.version>3.1.0</javaxServlet.version>
 
         <json4s.version>3.6.7</json4s.version>
-        <keycloack.version>11.0.2</keycloack.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
 
         <build.number>${timestamp}-dev</build.number>
@@ -76,13 +72,6 @@
 
         <jwt-core.version>3.1.0</jwt-core.version>
         <jose4j.version>0.6.5</jose4j.version>
-        <embedded-keycloak.version>0.1.6</embedded-keycloak.version>
-        <embedded-keycloak_2.12.version>0.0.7-beta</embedded-keycloak_2.12.version>
-
-        <gremlinScala.version>3.4.7.2</gremlinScala.version>
-        <janusGraph.version>0.5.2</janusGraph.version>
-        <tinkerPopDriver.version>3.3.3</tinkerPopDriver.version>
-        <tinkerPopJava.version>2.6.0</tinkerPopJava.version>
 
         <jetty-servlets.version>9.4.19.v20190610</jetty-servlets.version>
 
@@ -167,13 +156,6 @@
 
         <!-- /Json4s -->
 
-        <!-- Scalatra -->
-
-<!--        <dependency>-->
-<!--            <groupId>org.scalatra</groupId>-->
-<!--            <artifactId>scalatra_2.12</artifactId>-->
-<!--            <version>${scalatra.version}</version>-->
-<!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/org.scalatest/scalatest -->
         <dependency>

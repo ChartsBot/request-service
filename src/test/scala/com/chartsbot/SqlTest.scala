@@ -19,7 +19,7 @@ object SqlTest {
 
     implicit val ec: ExecutionContext = Injector.get[ExecutionContext]
 
-    val t = Injector.get[DefaultSqlFilesDAO]
+    val t: DefaultSqlFilesDAO = Injector.get[DefaultSqlFilesDAO]
 
     val res = Await.result(t.selectAll(), 10.second)
 
